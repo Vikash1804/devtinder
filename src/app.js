@@ -4,6 +4,20 @@ const app = express();
 const UserModel = require("./models/User");
 
 
+app.use(express.json());
+
+app.post("/signUp" , async(req , res)=>{
+  // creating instance of user model and passing the data from request body
+    const user = new UserModel(req.body); 
+    try {
+         await user.save();
+     res.send("User is created successfully");
+    }
+   catch (err) {
+    res.status(500).send("User is not created");
+}
+});
+
 
 
 connectDB().then(()=>{
@@ -18,22 +32,5 @@ app.listen(7777, () => {
 })
 
 
-app.post("/signUp" , async(req , res)=>{
-  // creating instance of user model and passing dummy data to it
-    const user = new UserModel({
-        firstName : "Rohit",
-        lastName : "Sharma",
-        emailId : "rohit.sharma@example.com",
-        password : "password123",
-    });
-    
-    try {
-         await user.save();
-     res.send("User is created successfully");
-    }
-   catch (err) {
-    res.status(500).send("User is not created");
-}
-})
 
 
