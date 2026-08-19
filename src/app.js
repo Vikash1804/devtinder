@@ -28,7 +28,22 @@ app.get("/allUsers" , async(req , res)=>{
         res.status(500).send("Error in fetching users");
     }
     
-})
+});
+
+
+app.delete("/user", async(req,res)=>{
+    const user = req.body;
+    const userId = req.body.userId;
+    
+
+    try{
+        const user = await UserModel.findByIdAndDelete(userId);
+        res.send("User is deleted successfully");
+    }
+    catch(err){
+        res.status(400).send("Error in deleting user");
+    }
+});
 
 connectDB().then(()=>{
     console.log("Database is connected");
