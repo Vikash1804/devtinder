@@ -18,7 +18,17 @@ app.post("/signUp" , async(req , res)=>{
 }
 });
 
-
+app.get("/allUsers" , async(req , res)=>{
+    
+    try {
+        const users = await UserModel.find();
+        res.send(users);
+    }
+    catch (err) {
+        res.status(500).send("Error in fetching users");
+    }
+    
+})
 
 connectDB().then(()=>{
     console.log("Database is connected");
