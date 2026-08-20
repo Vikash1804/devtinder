@@ -14,7 +14,7 @@ app.post("/signUp" , async(req , res)=>{
      res.send("User is created successfully");
     }
    catch (err) {
-    res.status(500).send("User is not created");
+    res.status(500).send("User is not created" +err.message);
 }
 });
 
@@ -25,7 +25,7 @@ app.get("/allUsers" , async(req , res)=>{
         res.send(users);
     }
     catch (err) {
-        res.status(500).send("Error in fetching users");
+        res.status(500).send("Error in fetching users" + err.message);
     }
     
 });
@@ -41,22 +41,50 @@ app.delete("/user", async(req,res)=>{
         res.send("User is deleted successfully");
     }
     catch(err){
-        res.status(400).send("Error in deleting user");
+        res.status(400).send("Error in deleting user" + err.message);
     }
 });
 
-app.patch("/user" , async(req , res)=>{
-    const userId = req.body.userId;
-    const firstName = req.body.firstName;
-    try{
-        const updateuser =  await UserModel.findByIdAndUpdate(userId , {firstName: firstName});
-        res.send("Updated sucessfully");
+app.patch("/user/:userId", async (req, res) => {
+    const userId = req.params.userId;
+    const data = req.body;
+
+    try {
+        const updateallowed = [
+            "firstName",
+            "lastName",
+            "age",
+            "gender",
+            "skills"
+        ];
+
+        const updatecheck = Object.keys(data).every((k) =>
+            updateallowed.includes(k)
+        );
+
+        if (!updatecheck) {
+            throw new Error("Can't update the data");
+        }
+
+        const updateuser = await UserModel.findByIdAndUpdate(
+            userId,
+            data,
+            {
+                returnDocument: "after",
+                runValidators: true
+            }
+        );
+
+        if (!updateuser) {
+            throw new Error("User not found");
+        }
+
+        res.send("Updated successfully");
     }
-    catch(err){
-        res.status(400).send("Something wnt wrong");
+    catch (err) {
+        res.status(400).send("Something went wrong: " + err.message);
     }
-    
-})
+});
 
 connectDB().then(()=>{
     console.log("Database is connected");
