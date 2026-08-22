@@ -2,20 +2,58 @@ const express = require("express");
 const connectDB = require("./config/database");
 const app = express();
 const UserModel = require("./models/User");
-
-
+const {ValidateSignUp} = require("./utils/validate");
+const bcrypt = require("bcrypt");
 app.use(express.json());
 
 app.post("/signUp" , async(req , res)=>{
   // creating instance of user model and passing the data from request body
-    const user = new UserModel(req.body); 
-    try {
+     try {  
+
+      ValidateSignUp(req );
+       const {firstName , lastName , emailId , password} = req.body;
+      const PasswordHash = await bcrypt.hash(password , 10); 
+      console.log(PasswordHash);
+    const user = new UserModel({
+        firstName ,
+        lastName , 
+        emailId ,
+        password : PasswordHash
+
+    }); 
+   
          await user.save();
      res.send("User is created successfully");
     }
    catch (err) {
-    res.status(500).send("User is not created" +err.message);
+    res.status(500).send("User is not created : " +err.message);
 }
+});
+
+app.post("/login" , async(req,res)=>{
+    try{
+     const { emailId , password} = req.body
+
+     const user =  await UserModel.findOne({emailId});
+   if(!user){
+    throw new Error("Email Is not Valid")
+   }
+
+const checkpassword = await bcrypt.compare(password , user.password);
+   console.log(user);
+
+   if(checkpassword){
+    res.send("Login Successfully");
+   }
+   else{
+    res.status(400).send("Password Is Incorrect");
+   }
+}
+catch (err){
+    res.status(400).send("ERROR: " +err.message);
+}
+
+
 });
 
 app.get("/allUsers" , async(req , res)=>{
