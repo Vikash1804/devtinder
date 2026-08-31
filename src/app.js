@@ -4,6 +4,7 @@ const app = express();
 const AuthRouter = require("./Routes/Auth");
 const { ProfileRouter } = require("./Routes/Profile");
 const { RequestRouter } = require("./Routes/Request");
+const UserRouter = require("./Routes/User");
 
 
 // use to read the data in json format
@@ -14,6 +15,7 @@ app.use(express.json());
 app.use("/" , AuthRouter);
 app.use("/" , ProfileRouter);
 app.use("/" , RequestRouter);
+app.use("/" , UserRouter)
 
 
 

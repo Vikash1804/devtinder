@@ -31,7 +31,7 @@ RequestRouter.post(
 
             
             if(sender==receiver){
-                res.status(404).send("Can not send request to yourself")
+                return res.status(404).send("Can not send request to yourself")
             }
             const existingConnectionRequest = await ConnectionRequest.findOne({
                 $or: [
@@ -45,14 +45,14 @@ RequestRouter.post(
                     message:"Request Already Sent"
                 })
             }
-
-
             const data = await connectionRequest.save();
 
             res.json({
                 message: "Connection Sent Successfully",
                 data
             });
+
+            
         } 
         catch (err) {
             res.status(400).send("ERROR " + err.message);
