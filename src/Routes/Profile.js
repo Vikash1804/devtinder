@@ -5,7 +5,7 @@
  const app  = express();
  const ProfileRouter = express.Router();
  const {UserAuth} = require("../middleware/Auth")
- const { validateEditProfileData } = require("../utils/validate");
+ const { validateEditProfileData } = require("../utils/Validate");
  
 ProfileRouter.use(cookiePraser());
    
