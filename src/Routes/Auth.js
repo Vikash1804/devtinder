@@ -6,6 +6,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken")
 
 
+
 AuthRouter.post("/signUp" , async(req , res)=>{
   // creating instance of user model and passing the data from request body
      try {  
@@ -35,7 +36,7 @@ AuthRouter.post("/login" , async(req,res)=>{
 
      const user =  await UserModel.findOne({emailId});
    if(!user){
-    throw new Error("Invalid Infromation")
+    return res.status(401).send("Invalid Credentials")
    }
 
 const checkpassword = await bcrypt.compare(password , user.password);
@@ -45,14 +46,15 @@ const checkpassword = await bcrypt.compare(password , user.password);
  // Add the token to the cookies
  res.cookie("token" , token);
  // send response back to the user
-    res.send("Login Successfully");
+ console.log(user)
+    res.send(user);
    }
    else{
-    res.status(400).send("Invalid Infromation");
+    res.status(401).send("Invalid Credentials");
    }
 }
 catch (err){
-    res.status(400).send("ERROR: " +err.message);
+    res.status(401).send("ERROR: " +err.message);
 }
 });
 

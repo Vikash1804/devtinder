@@ -1,17 +1,16 @@
 const UserModel = require("../models/User");
 const cookiePraser = require("cookie-parser")
 const jwt = require("jsonwebtoken")
-const express = require("express")
-const app  = express();
 
-app.use(cookiePraser());
+
   
 
 const UserAuth = async (req , res , next) =>{
+    
     try{
     const token = req.cookies.token
     if(!token) {
-        throw new Error("Token is not valid Please Login")
+        return res.status(401).send("Please Login")
     }
 
     const validatetoken = await jwt.verify(token , "DevTinder1807");
@@ -27,7 +26,7 @@ const UserAuth = async (req , res , next) =>{
     next();
 }
 catch (err){
-    res.status(400).send("ERROR!!: "+err.message);
+    res.status(401).send("ERROR!!!!: "+err.message);
 
 }
 };

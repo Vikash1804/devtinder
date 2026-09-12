@@ -1,5 +1,5 @@
 const express = require("express");
-const { UserAuth } = require("./Profile");
+const { UserAuth } = require("../middleware/Auth");
 const ConnectionRequest = require("../models/ConnectionRequest");
 const UserModel = require("../models/User");
 const UserRouter = express.Router();
@@ -15,7 +15,10 @@ UserRouter.get("/user/requests/recieved",UserAuth , async(req,res)=>{
     const connectionRequest = await ConnectionRequest.find({
         receiver  : loggedInUser._id,
         status : "interested"
-    }).populate("sender", ["firstName"  , "lastName" , "age"]);
+    }).populate(
+    "sender",
+    "firstName lastName age gender photoUrl skills about"
+)
 
     res.json({
         message : "Data fetch Successfully",
@@ -34,14 +37,20 @@ UserRouter.get("/user/allConnection",UserAuth , async(req,res)=>{
     const loggedInUser = req.user
     console.log(loggedInUser)
       
-    const connectionRequest = await ConnectionRequest.find({
-       $or : [
-        {sender : loggedInUser , status : "accepted"},
-        {receiver : loggedInUser , status : "accepted"}
-       ]
-    }).populate("sender",["firstName", "lastName", "age"])
-    .populate("receiver",["firstName", "lastName", "age"]);
-
+const connectionRequest = await ConnectionRequest.find({
+    $or: [
+        { sender: loggedInUser, status: "accepted" },
+        { receiver: loggedInUser, status: "accepted" }
+    ]
+})
+.populate(
+    "sender",
+    "firstName lastName age gender photoUrl skills about"
+)
+.populate(
+    "receiver",
+    "firstName lastName age gender photoUrl skills about"
+);
    const connections = connectionRequest.map(request => {
             return request.sender._id.toString() === loggedInUser._id.toString()
                 ? request.receiver  // If user is sender, return receiver
@@ -86,7 +95,7 @@ UserRouter.get("/user/feed",UserAuth , async(req, res)=>{
             {_id : {$nin : Array.from(hideUser)}},
             {_id : {$ne : loggedInUser}}
         ]
-    }).select("firstName lastName age").skip(skip)
+    }).select("firstName lastName skills photoUrl about age gender").skip(skip)
     .limit(limit);
 
     res.json({

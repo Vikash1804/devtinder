@@ -4,37 +4,15 @@
  const express = require("express")
  const app  = express();
  const ProfileRouter = express.Router();
+ const {UserAuth} = require("../middleware/Auth")
+ const { validateEditProfileData } = require("../utils/validate");
  
 ProfileRouter.use(cookiePraser());
    
+
  
- const UserAuth = async (req , res , next) =>{
-     try{
-     const token = req.cookies.token
-     if(!token) {
-         throw new Error("Token is not valid Please Login")
-     }
- 
-     const validatetoken = await jwt.verify(token , "DevTinder1807");
-       const {_id} = validatetoken
-     const user = await UserModel.findById(_id);
- 
-     if(!user){
-         throw new Error("User not found")
-     }
- 
-     req.user = user;
- 
-     next();
- }
- catch (err){
-     res.status(400).send("ERROR!!: "+err.message);
- 
- }
- };
- 
- 
-ProfileRouter.get("/profile" , UserAuth , async (req , res)=>{
+ProfileRouter.get("/profile/view" , UserAuth , async (req , res)=>{
+   
     try{
 
     const  user = req.user; 
@@ -44,8 +22,28 @@ ProfileRouter.get("/profile" , UserAuth , async (req , res)=>{
         res.status(500).send("Error in fetching users : " + err.message);
     }
 });
+ProfileRouter.patch("/profile/edit", UserAuth, async (req, res) => {
+  try {
+    if (!validateEditProfileData(req)) {
+      throw new Error("Invalid Edit Request");
+    }
+
+    const loggedInUser = req.user;
+
+    Object.keys(req.body).forEach((key) => (loggedInUser[key] = req.body[key]));
+
+    await loggedInUser.save();
+
+    res.json({
+      message: `${loggedInUser.firstName}, your profile updated successfuly`,
+      data: loggedInUser,
+    });
+  } catch (err) {
+    res.status(400).send("ERROR : " + err.message);
+  }
+});
 
 
 module.exports = {
-     UserAuth , ProfileRouter
+      ProfileRouter
  }

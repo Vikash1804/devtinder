@@ -5,11 +5,17 @@ const AuthRouter = require("./Routes/Auth");
 const { ProfileRouter } = require("./Routes/Profile");
 const { RequestRouter } = require("./Routes/Request");
 const UserRouter = require("./Routes/User");
+const cookieParser = require("cookie-parser");
+const cors = require("cors");
 
 
 // use to read the data in json format
+app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+}))
 app.use(express.json());
-
+app.use(cookieParser());
 
 // adding all routes from thr routes.js file
 app.use("/" , AuthRouter);
